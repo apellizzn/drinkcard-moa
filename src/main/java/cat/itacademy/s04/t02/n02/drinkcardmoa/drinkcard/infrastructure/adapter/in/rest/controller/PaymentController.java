@@ -32,7 +32,6 @@ public class PaymentController {
     private static final String SUM_UP_EVENT_TYPE = "CHECKOUT_STATUS_CHANGED";
 
     private final CreatePaymentCheckoutUseCase createPaymentCheckoutUseCase;
-    private final ConfirmPaymentUseCase confirmPaymentUseCase;
     private final ProcessPaymentWebhookUseCase processPaymentWebhookUseCase;
     private final ListCurrentVolunteerPaymentsUseCase listCurrentVolunteerPaymentsUseCase;
     private final GetPaymentStatusUseCase getPaymentStatusUseCase;
@@ -55,14 +54,6 @@ public class PaymentController {
         processPaymentWebhookUseCase.execute(new ProcessPaymentWebhookCommand(request.id()));
 
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{paymentId}/confirm")
-    public ResponseEntity<ConfirmPaymentResponse> confirmPayment(@PathVariable String paymentId) {
-
-        ConfirmPaymentResult result = confirmPaymentUseCase.execute(mapper.toCommand(paymentId));
-
-        return ResponseEntity.status(200).body(mapper.toResponse(result));
     }
 
     @GetMapping("/me")

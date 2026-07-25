@@ -195,28 +195,6 @@ class ProcessPaymentWebhookServiceTest {
         verify(eventPublisher, never()).publish(any());
     }
 
-    @Test
-    void execute_WhenProviderStatusIsExpired_MarksPaymentAsExpiredWithoutAddingCredits() {
-        Payment payment = pendingPayment(VolunteerID.generate());
-
-        when(transactionTemplate.execute(any())).thenAnswer(executeTransactionCallback());
-
-        when(paymentRepository.findByProviderCheckoutId(PaymentTestBuilder.DEFAULT_PROVIDER_CHECKOUT_ID))
-                .thenReturn(Optional.of(payment));
-        when(paymentGateway.fetchCheckoutStatus(PaymentTestBuilder.DEFAULT_PROVIDER_CHECKOUT_ID))
-                .thenReturn(PaymentGatewayStatus.EXPIRED);
-        doAnswer(executeWithoutResultCallback()).when(transactionTemplate).executeWithoutResult(any());
-
-        service.execute(command());
-
-        assertEquals(PaymentStatus.EXPIRED, payment.getStatus());
-
-        verify(paymentGateway).fetchCheckoutStatus(PaymentTestBuilder.DEFAULT_PROVIDER_CHECKOUT_ID);
-        verify(drinkCardAccountRepository, never()).findByVolunteerId(any());
-        verify(drinkCardAccountRepository, never()).save(any());
-        verify(paymentRepository).save(payment);
-        verify(eventPublisher, never()).publish(any());
-    }
 
     @Test
     void execute_WhenProviderStatusIsPending_DoesNotChangePayment() {

@@ -114,38 +114,23 @@ public class Payment {
     }
 
     public void markAsSuccess() {
-        if (this.status != PaymentStatus.PENDING)
-            throw new InvalidPaymentStateException("Payment is not in pending state");
+        if (this.status == PaymentStatus.SUCCESS) {
+            throw new InvalidPaymentStateException("Payment is already successful");
+        }
 
         this.status = PaymentStatus.SUCCESS;
         this.paidAt = Instant.now();
     }
 
     public void markAsFailed() {
-        if(this.status != PaymentStatus.PENDING)
-            throw new InvalidPaymentStateException("Payment is not in pending state");
+        if(this.status == PaymentStatus.SUCCESS)
+            throw new InvalidPaymentStateException("Payment is already finalized");
 
         this.status = PaymentStatus.FAILED;
     }
 
-    public void extendExpiration(Instant expiration) {
-        this.expiresAt = expiration;
-    }
-
-    public void markAsExpired() {
-        if(this.status != PaymentStatus.PENDING)
-            throw new InvalidPaymentStateException("Payment is not in pending state");
-
-        this.status = PaymentStatus.EXPIRED;
-    }
-
     public boolean isFinalized() {
-        return this.status == PaymentStatus.SUCCESS || this.status == PaymentStatus.FAILED
-                || this.status == PaymentStatus.EXPIRED;
-    }
-
-    public boolean isExpired() {
-        return this.status == PaymentStatus.EXPIRED;
+        return this.status == PaymentStatus.SUCCESS;
     }
 
     public boolean isSuccess() {

@@ -151,8 +151,7 @@ class PaymentTest {
                 () -> assertNotNull(payment.getPaidAt()),
                 () -> assertTrue(payment.isSuccess()),
                 () -> assertTrue(payment.isFinalized()),
-                () -> assertFalse(payment.isFailed()),
-                () -> assertFalse(payment.isExpired())
+                () -> assertFalse(payment.isFailed())
         );
     }
 
@@ -166,31 +165,14 @@ class PaymentTest {
                 () -> assertEquals(PaymentStatus.FAILED, payment.getStatus()),
                 () -> assertNull(payment.getPaidAt()),
                 () -> assertTrue(payment.isFailed()),
-                () -> assertTrue(payment.isFinalized()),
-                () -> assertFalse(payment.isSuccess()),
-                () -> assertFalse(payment.isExpired())
+                () -> assertFalse(payment.isFinalized()),
+                () -> assertFalse(payment.isSuccess())
         );
     }
 
     @Test
-    void markAsExpired_WhenPaymentIsPending_ShouldChangeStatusToExpired() {
-        Payment payment = pendingPayment();
-
-        payment.markAsExpired();
-
-        assertAll(
-                () -> assertEquals(PaymentStatus.EXPIRED, payment.getStatus()),
-                () -> assertNull(payment.getPaidAt()),
-                () -> assertTrue(payment.isExpired()),
-                () -> assertTrue(payment.isFinalized()),
-                () -> assertFalse(payment.isSuccess()),
-                () -> assertFalse(payment.isFailed())
-        );
-    }
-
-    @Test
-    void markAsSuccess_WhenPaymentIsNotPending_ShouldThrowException() {
-        Payment payment = paymentWithStatus(PaymentStatus.FAILED);
+    void markAsSuccess_WhenPaymentIsAlreadySuccess_ShouldThrowException() {
+        Payment payment = paymentWithStatus(PaymentStatus.SUCCESS);
 
         assertThrows(InvalidPaymentStateException.class, payment::markAsSuccess);
     }
@@ -200,13 +182,6 @@ class PaymentTest {
         Payment payment = paymentWithStatus(PaymentStatus.SUCCESS);
 
         assertThrows(InvalidPaymentStateException.class, payment::markAsFailed);
-    }
-
-    @Test
-    void markAsExpired_WhenPaymentIsNotPending_ShouldThrowException() {
-        Payment payment = paymentWithStatus(PaymentStatus.SUCCESS);
-
-        assertThrows(InvalidPaymentStateException.class, payment::markAsExpired);
     }
 
     @Test

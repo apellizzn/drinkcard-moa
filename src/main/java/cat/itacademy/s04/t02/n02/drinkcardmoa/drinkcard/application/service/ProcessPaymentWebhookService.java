@@ -99,11 +99,6 @@ public class ProcessPaymentWebhookService implements ProcessPaymentWebhookUseCas
                     paymentRepository.save(payment);
                 }
 
-                case EXPIRED -> {
-                    payment.markAsExpired();
-                    paymentRepository.save(payment);
-                }
-
                 case PENDING -> {
                     log.info("SumUp checkout is still pending: {}", providerCheckoutId);
                 }

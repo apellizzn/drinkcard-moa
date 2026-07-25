@@ -4,15 +4,12 @@ import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.
 import cat.itacademy.s04.t02.n02.drinkcardmoa.iam.application.port.out.TokenService;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.iam.infrastructure.adapter.out.security.JwtAuthenticationFilter;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.iam.infrastructure.config.SecurityConfiguration;
-import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.command.ConfirmPaymentCommand;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.command.CreatePaymentCheckoutCommand;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.command.ProcessPaymentWebhookCommand;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.query.ListCurrentVolunteerPaymentsQuery;
-import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.result.ConfirmPaymentResult;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.result.CreatePaymentCheckoutResult;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.result.PaymentStatusResult;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.dto.result.PaymentSummaryResult;
-import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.usecase.ConfirmPaymentUseCase;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.usecase.CreatePaymentCheckoutUseCase;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.usecase.GetPaymentStatusUseCase;
 import cat.itacademy.s04.t02.n02.drinkcardmoa.drinkcard.application.port.in.usecase.ListCurrentVolunteerPaymentsUseCase;
@@ -62,9 +59,6 @@ class PaymentControllerTest {
 
     @MockitoBean
     private CreatePaymentCheckoutUseCase createPaymentCheckoutUseCase;
-
-    @MockitoBean
-    private ConfirmPaymentUseCase confirmPaymentUseCase;
 
     @MockitoBean
     private ListCurrentVolunteerPaymentsUseCase listCurrentVolunteerPaymentsUseCase;
@@ -139,36 +133,6 @@ class PaymentControllerTest {
                         .content(requestBody)
                         .with(user("some-user").roles("OTHER")))
                 .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void confirmPayment_ReturnsOkConfirmPaymentResponse() throws Exception {
-        String paymentId = "payment-123";
-
-        ConfirmPaymentResult result = new ConfirmPaymentResult(
-                paymentId,
-                "SUCCESS",
-                5,
-                BigDecimal.valueOf(10)
-        );
-
-        when(confirmPaymentUseCase.execute(new ConfirmPaymentCommand(paymentId)))
-                .thenReturn(result);
-
-        mockMvc.perform(post("/api/v1/payments/{paymentId}/confirm", paymentId)
-                        .with(user("any-user").roles("VOLUNTEER")))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.paymentId").value(paymentId))
-                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                .andExpect(jsonPath("$.credits").value(5))
-                .andExpect(jsonPath("$.amount").value(10));
-
-        ArgumentCaptor<ConfirmPaymentCommand> commandCaptor =
-                ArgumentCaptor.forClass(ConfirmPaymentCommand.class);
-
-        verify(confirmPaymentUseCase).execute(commandCaptor.capture());
-
-        assertEquals(paymentId, commandCaptor.getValue().paymentId());
     }
 
     @Test
